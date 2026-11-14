@@ -186,7 +186,7 @@ Files appear only in the milestone that needs them. Keep files small.
 - [ ] Test portrait and landscape, notch and home indicator.
 - [ ] VoiceOver pass over every control.
 - [ ] Test storage-full handling as far as is practical.
-- [ ] Empty state message when no sounds exist.
+- [x] Empty state message when no sounds exist.
 - [ ] Confirm the user's final icon artwork is in place and displays correctly on the Home Screen.
 
 **Done when:** Every checkbox in PRD.md section 7 is ticked after testing on a real iPhone, and no console errors appear in Safari Web Inspector during the run.

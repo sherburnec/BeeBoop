@@ -82,6 +82,14 @@ function section(title, sounds, opts) {
 export function renderGrid(sounds, opts) {
   grid.classList.toggle("editing", opts.edit);
   grid.classList.toggle("grouped", opts.groupView);
+  if (!sounds.length) {
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = 'No sounds yet. Tap "Add sounds" to import audio files from the Files app.';
+    grid.classList.remove("grouped");
+    grid.replaceChildren(p);
+    return;
+  }
   if (!opts.groupView) {
     grid.replaceChildren(...sounds.map((s, i) => tile(s, sounds, i, opts)));
     return;
