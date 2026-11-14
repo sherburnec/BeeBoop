@@ -163,10 +163,10 @@ Files appear only in the milestone that needs them. Keep files small.
 **Files touched:** `sw.js`, `js/main.js`
 
 **Tasks:**
-- [ ] `sw.js`: versioned cache name; precache every app file listed in an explicit array; cache-first fetch for same-origin GET; delete old caches on `activate`.
-- [ ] Register the service worker from `main.js` after load, with a relative path and scope.
-- [ ] Do not cache audio; it lives in IndexedDB.
-- [ ] Do not call `skipWaiting` automatically in a way that breaks a running session; new version applies on next launch.
+- [x] `sw.js`: versioned cache name; precache every app file listed in an explicit array; cache-first fetch for same-origin GET; delete old caches on `activate`.
+- [x] Register the service worker from `main.js` after load, with a relative path and scope.
+- [x] Do not cache audio; it lives in IndexedDB.
+- [x] Do not call `skipWaiting` automatically in a way that breaks a running session; new version applies on next launch.
 
 **Done when:** After one online load, with DevTools "Offline" on (desktop) the app reloads and plays stored sounds; on iPhone in airplane mode the Home Screen app launches and plays sounds; bumping the cache version and reloading online replaces old caches.
 

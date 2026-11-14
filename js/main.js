@@ -364,3 +364,9 @@ init().catch((err) => {
   console.error(err);
   ui.showMessage("Could not open the sound library on this device.");
 });
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js", { scope: "./" }).catch((err) => console.error("Service worker registration failed", err));
+  });
+}
