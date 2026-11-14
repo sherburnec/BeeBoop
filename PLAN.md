@@ -84,15 +84,15 @@ Files appear only in the milestone that needs them. Keep files small.
 **Files touched:** `index.html`, `js/audio.js`, `js/ui.js`, `js/main.js`, `css/app.css`
 
 **Tasks:**
-- [ ] File input `accept="audio/*" multiple` behind an "Add sounds" button.
-- [ ] On import: for each file, read to ArrayBuffer, test with `decodeAudioData`, store blob and metadata in IndexedDB, create button. On decode failure, skip and collect the filename for the message.
-- [ ] `audio.js`: create or resume AudioContext on the first user tap; resume on `visibilitychange` and when state is `suspended` or `interrupted`; set `navigator.audioSession.type = "playback"` if present.
-- [ ] Master `GainNode` for volume. Per-play `AudioBufferSourceNode`.
-- [ ] Buffer cache: decode on load, mark buttons as loading until ready.
-- [ ] Tap behavior: if the sound is playing, stop it; otherwise play it from the start.
-- [ ] Overlap toggle, Loop toggle (sets `source.loop`), and volume slider, all persisted via `settings` store. Stop all control.
-- [ ] Playing-state class on buttons, cleared on `ended`.
-- [ ] Render grid from DB on load.
+- [x] File input `accept="audio/*" multiple` behind an "Add sounds" button.
+- [x] On import: for each file, read to ArrayBuffer, test with `decodeAudioData`, store blob and metadata in IndexedDB, create button. On decode failure, skip and collect the filename for the message.
+- [x] `audio.js`: create or resume AudioContext on the first user tap; resume on `visibilitychange` and when state is `suspended` or `interrupted`; set `navigator.audioSession.type = "playback"` if present.
+- [x] Master `GainNode` for volume. Per-play `AudioBufferSourceNode`.
+- [x] Buffer cache: decode on load, mark buttons as loading until ready.
+- [x] Tap behavior: if the sound is playing, stop it; otherwise play it from the start.
+- [x] Overlap toggle, Loop toggle (sets `source.loop`), and volume slider, all persisted via `settings` store. Stop all control.
+- [x] Playing-state class on buttons, cleared on `ended`.
+- [x] Render grid from DB on load.
 
 **Done when:** On a real iPhone, importing three files (one each of mp3, m4a, wav) creates three buttons that play on tap; an undecodable file shows an error without blocking the others; sounds and settings survive closing and reopening Safari; sound plays with the silent switch on; overlap on/off both behave per FR-11; a second tap stops a playing sound; with Loop on a sound repeats until tapped or Stop all.
 

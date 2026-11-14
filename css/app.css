@@ -1,6 +1,8 @@
 :root {
   --bg: #fff6fb;
   --text: #1c1c1e;
+  --surface: #ffffff;
+  --accent: #5b4bb7;
   --gap: 12px;
 }
 
@@ -21,30 +23,111 @@ body {
   padding-left: env(safe-area-inset-left);
 }
 
+button {
+  font: inherit;
+  color: var(--text);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  align-items: center;
+  gap: 8px;
   padding: var(--gap);
-  min-height: 44px;
+  background: var(--bg);
 }
 
 .toolbar button {
   min-width: 44px;
   min-height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.toolbar button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.volume input {
+  width: 120px;
+  min-height: 44px;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  margin: 0 var(--gap);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #ffe3e3;
+}
+
+.message button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--gap);
   padding: var(--gap);
 }
 
-.grid button {
-  min-height: 88px;
+.sound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 96px;
+  width: 100%;
+  padding: 8px;
+  border: 3px solid transparent;
+  border-radius: 16px;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
 }
 
-@media (orientation: landscape) {
-  .grid { grid-template-columns: repeat(4, 1fr); }
+.sound .emoji { font-size: 1.8rem; line-height: 1; }
+
+.sound.playing {
+  border-color: var(--text);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.sound.loading { opacity: 0.5; }
+
+.sound.error {
+  opacity: 0.5;
+  border-style: dashed;
+  border-color: #b3261e;
+}
+
+@keyframes pulse {
+  50% { transform: scale(0.96); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound.playing { animation: none; }
 }

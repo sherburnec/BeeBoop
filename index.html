@@ -15,7 +15,17 @@
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <header class="toolbar" role="toolbar" aria-label="Soundboard controls"></header>
+  <div class="toolbar" role="group" aria-label="Soundboard controls">
+    <button id="add-btn" type="button">Add sounds</button>
+    <input id="file-input" type="file" accept="audio/*" multiple hidden>
+    <button id="stop-btn" type="button">Stop all</button>
+    <button id="overlap-btn" type="button" aria-pressed="true">Overlap</button>
+    <button id="loop-btn" type="button" aria-pressed="false">Loop</button>
+    <label class="volume">Volume
+      <input id="volume" type="range" min="0" max="100" step="1" value="100">
+    </label>
+  </div>
+  <div id="message" class="message" role="status" aria-live="polite" hidden></div>
   <main id="grid" class="grid" aria-label="Sounds"></main>
   <script type="module" src="js/main.js"></script>
 </body>
