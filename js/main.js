@@ -8,6 +8,7 @@ const state = {
   sounds: [],
   settings: { overlap: true, loop: false, volume: 1 },
   failed: new Set(),
+  edit: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -16,6 +17,7 @@ const fileInput = $("file-input");
 const stopBtn = $("stop-btn");
 const overlapBtn = $("overlap-btn");
 const loopBtn = $("loop-btn");
+const editBtn = $("edit-btn");
 const volumeInput = $("volume");
 
 function refresh() {
@@ -23,13 +25,55 @@ function refresh() {
 }
 
 function render() {
-  ui.renderGrid(state.sounds, { onTap });
+  ui.renderGrid(state.sounds, { onTap, onMove, edit: state.edit });
   refresh();
 }
 
 function onTap(id) {
+  if (state.edit) {
+    ui.openEditSheet(state.sounds.find((s) => s.id === id), { onSave, onDelete });
+    return;
+  }
   if (!audio.hasBuffer(id)) return;
   audio.toggle(id, state.settings);
+}
+
+async function onSave(id, changes) {
+  try {
+    await db.updateSound(id, changes);
+    Object.assign(state.sounds.find((s) => s.id === id), changes);
+    render();
+  } catch (err) {
+    ui.showMessage(db.isQuotaError(err) ? "Storage is full. Your change was not saved." : "Could not save your change.");
+  }
+}
+
+async function onDelete(id) {
+  try {
+    await db.deleteSound(id);
+  } catch {
+    ui.showMessage("Could not delete that sound.");
+    return;
+  }
+  audio.dropBuffer(id);
+  state.failed.delete(id);
+  state.sounds = state.sounds.filter((s) => s.id !== id);
+  render();
+}
+
+// Swaps the order values of two sounds and persists both.
+async function onMove(id, neighborId) {
+  const a = state.sounds.find((s) => s.id === id);
+  const b = state.sounds.find((s) => s.id === neighborId);
+  try {
+    await Promise.all([db.updateSound(a.id, { order: b.order }), db.updateSound(b.id, { order: a.order })]);
+  } catch {
+    ui.showMessage("Could not save the new order.");
+    return;
+  }
+  [a.order, b.order] = [b.order, a.order];
+  state.sounds.sort((x, y) => x.order - y.order);
+  render();
 }
 
 async function decodeAll() {
@@ -118,6 +162,11 @@ function wireToolbar() {
     }
   });
   stopBtn.addEventListener("click", () => audio.stopAll());
+  editBtn.addEventListener("click", () => {
+    state.edit = !state.edit;
+    ui.setToggle(editBtn, state.edit);
+    render();
+  });
   overlapBtn.addEventListener("click", () => {
     const on = !state.settings.overlap;
     ui.setToggle(overlapBtn, on);

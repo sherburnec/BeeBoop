@@ -21,12 +21,34 @@
     <button id="stop-btn" type="button">Stop all</button>
     <button id="overlap-btn" type="button" aria-pressed="true">Overlap</button>
     <button id="loop-btn" type="button" aria-pressed="false">Loop</button>
+    <button id="edit-btn" type="button" aria-pressed="false">Edit</button>
     <label class="volume">Volume
       <input id="volume" type="range" min="0" max="100" step="1" value="100">
     </label>
   </div>
   <div id="message" class="message" role="status" aria-live="polite" hidden></div>
   <main id="grid" class="grid" aria-label="Sounds"></main>
+  <dialog id="edit-dialog" aria-labelledby="edit-title">
+    <form id="edit-form" method="dialog">
+      <h2 id="edit-title">Edit sound</h2>
+      <label class="field">Name
+        <input id="edit-name" type="text" autocomplete="off">
+      </label>
+      <p id="edit-error" class="error-text" role="alert" hidden>Name can't be empty.</p>
+      <fieldset class="field">
+        <legend>Color</legend>
+        <div id="edit-colors" class="colors"></div>
+      </fieldset>
+      <label class="field">Emoji (optional)
+        <input id="edit-emoji" type="text" autocomplete="off">
+      </label>
+      <div class="actions">
+        <button id="edit-save" type="submit">Save</button>
+        <button id="edit-cancel" type="button">Cancel</button>
+        <button id="edit-delete" type="button" class="danger">Delete</button>
+      </div>
+    </form>
+  </dialog>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

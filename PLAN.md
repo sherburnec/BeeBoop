@@ -106,13 +106,13 @@ Files appear only in the milestone that needs them. Keep files small.
 **Files touched:** `js/ui.js`, `js/db.js` (only if a missing function is needed), `js/main.js`, `css/app.css`, `index.html`
 
 **Tasks:**
-- [ ] "Edit" mode toggle in the toolbar. In edit mode, tapping a button opens an edit sheet instead of playing.
-- [ ] Edit sheet: name field, color choice from fixed palette, emoji field, delete button.
-- [ ] Reject empty names.
-- [ ] Delete with confirmation; remove from DB and buffer cache.
-- [ ] Reorder in edit mode using explicit move controls (up and down or left and right). Touch drag-and-drop is not used by default because it is unreliable on iOS; ask before adding it.
-- [ ] Persist `order` after each move.
-- [ ] Fixed palette of light pastel colors (exactly 8) with dark button text, chosen to meet AA contrast.
+- [x] "Edit" mode toggle in the toolbar. In edit mode, tapping a button opens an edit sheet instead of playing.
+- [x] Edit sheet: name field, color choice from fixed palette, emoji field, delete button.
+- [x] Reject empty names.
+- [x] Delete with confirmation; remove from DB and buffer cache.
+- [x] Reorder in edit mode using explicit move controls (up and down or left and right). Touch drag-and-drop is not used by default because it is unreliable on iOS; ask before adding it.
+- [x] Persist `order` after each move.
+- [x] Fixed palette of light pastel colors (exactly 8) with dark button text, chosen to meet AA contrast.
 
 **Done when:** On iPhone, rename, recolor, set emoji, move and delete a sound; after a full app relaunch every change is still present; deleting a sound removes its record from IndexedDB (verified in Safari Web Inspector).
 
