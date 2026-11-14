@@ -48,25 +48,81 @@ function moveButton(text, label, disabled, onClick) {
   return b;
 }
 
-// handlers: { onTap(id), onMove(id, neighborId) }
-export function renderGrid(sounds, { onTap, onMove, edit }) {
-  grid.classList.toggle("editing", edit);
-  grid.replaceChildren(...sounds.map((sound, i) => {
-    const btn = soundButton(sound, onTap, edit);
-    if (!edit) return btn;
-    const prev = sounds[i - 1];
-    const next = sounds[i + 1];
-    const moves = document.createElement("div");
-    moves.className = "moves";
-    moves.append(
-      moveButton("◀", `Move ${sound.name} earlier`, !prev, () => onMove(sound.id, prev.id)),
-      moveButton("▶", `Move ${sound.name} later`, !next, () => onMove(sound.id, next.id)),
+function tile(sound, siblings, i, { onTap, onMove, edit }) {
+  const btn = soundButton(sound, onTap, edit);
+  if (!edit) return btn;
+  const prev = siblings[i - 1];
+  const next = siblings[i + 1];
+  const moves = document.createElement("div");
+  moves.className = "moves";
+  moves.append(
+    moveButton("◀", `Move ${sound.name} earlier`, !prev, () => onMove(sound.id, prev.id)),
+    moveButton("▶", `Move ${sound.name} later`, !next, () => onMove(sound.id, next.id)),
+  );
+  const wrap = document.createElement("div");
+  wrap.className = "tile";
+  wrap.append(btn, moves);
+  return wrap;
+}
+
+function section(title, sounds, opts) {
+  const sec = document.createElement("section");
+  sec.className = "group";
+  const h = document.createElement("h2");
+  h.textContent = title;
+  const inner = document.createElement("div");
+  inner.className = "section-grid";
+  inner.append(...sounds.map((s, i) => tile(s, sounds, i, opts)));
+  sec.append(h, inner);
+  return sec;
+}
+
+// opts: { onTap(id), onMove(id, neighborId), edit, groupView, groups }
+// `sounds` is already sorted by order. Move neighbors are within the same section.
+export function renderGrid(sounds, opts) {
+  grid.classList.toggle("editing", opts.edit);
+  grid.classList.toggle("grouped", opts.groupView);
+  if (!opts.groupView) {
+    grid.replaceChildren(...sounds.map((s, i) => tile(s, sounds, i, opts)));
+    return;
+  }
+  const sections = [];
+  for (const g of opts.groups) {
+    const members = sounds.filter((s) => s.groupId === g.id);
+    if (members.length || opts.edit) sections.push(section(g.name, members, opts));
+  }
+  const ungrouped = sounds.filter((s) => !s.groupId);
+  if (ungrouped.length || !sections.length) sections.push(section("Ungrouped", ungrouped, opts));
+  grid.replaceChildren(...sections);
+}
+
+const groupsPanel = document.getElementById("groups-panel");
+const groupsList = document.getElementById("groups-list");
+
+// handlers: { onAdd, onRename(id), onDelete(id), onMove(id, neighborId) }
+export function renderGroupsPanel(groups, visible, handlers) {
+  groupsPanel.hidden = !visible;
+  if (!visible) return;
+  groupsList.replaceChildren(...groups.map((g, i) => {
+    const li = document.createElement("li");
+    const name = document.createElement("span");
+    name.className = "group-name";
+    name.textContent = g.name;
+    const mk = (text, label, fn, disabled = false) => {
+      const b = moveButton(text, label, disabled, fn);
+      b.classList.remove("move");
+      return b;
+    };
+    li.append(
+      name,
+      mk("▲", `Move group ${g.name} up`, () => handlers.onMove(g.id, groups[i - 1].id), i === 0),
+      mk("▼", `Move group ${g.name} down`, () => handlers.onMove(g.id, groups[i + 1].id), i === groups.length - 1),
+      mk("Rename", `Rename group ${g.name}`, () => handlers.onRename(g.id)),
+      mk("Delete", `Delete group ${g.name}`, () => handlers.onDelete(g.id)),
     );
-    const tile = document.createElement("div");
-    tile.className = "tile";
-    tile.append(btn, moves);
-    return tile;
+    return li;
   }));
+  document.getElementById("group-add").onclick = handlers.onAdd;
 }
 
 // Updates playing/loading/error classes without rebuilding the grid.
@@ -113,11 +169,18 @@ function firstGrapheme(text) {
   return Array.from(t)[0];
 }
 
+const groupSelect = document.getElementById("edit-group");
+
 // handlers: { onSave(id, changes), onDelete(id) }
-export function openEditSheet(sound, handlers) {
+export function openEditSheet(sound, groups, handlers) {
   current = { sound, ...handlers };
   nameInput.value = sound.name;
   emojiInput.value = sound.emoji || "";
+  groupSelect.replaceChildren(
+    new Option("No group", ""),
+    ...groups.map((g) => new Option(g.name, g.id)),
+  );
+  groupSelect.value = sound.groupId || "";
   errorEl.hidden = true;
   nameInput.removeAttribute("aria-invalid");
   colorsEl.replaceChildren(...PALETTE.map((c) => {
@@ -153,6 +216,7 @@ form.addEventListener("submit", (e) => {
     name,
     color: picked ? picked.value : sound.color,
     emoji: firstGrapheme(emojiInput.value),
+    groupId: groupSelect.value || null,
   });
 });
 

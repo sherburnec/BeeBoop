@@ -126,10 +126,10 @@ Files appear only in the milestone that needs them. Keep files small.
 **Files touched:** `js/ui.js`, `js/main.js`, `js/db.js` (only if needed), `css/app.css`, `index.html`
 
 **Tasks:**
-- [ ] In edit mode: create, rename, reorder (move controls) and delete groups. Deleting a group sets `groupId` to null on its sounds.
-- [ ] Group picker in the sound edit sheet (one group or none).
-- [ ] "Group view" toggle persisted in `settings`. Off: flat grid by `order`. On: sections per group in group order, then "Ungrouped".
-- [ ] Section headings are real headings; sections work in portrait and landscape.
+- [x] In edit mode: create, rename, reorder (move controls) and delete groups. Deleting a group sets `groupId` to null on its sounds.
+- [x] Group picker in the sound edit sheet (one group or none).
+- [x] "Group view" toggle persisted in `settings`. Off: flat grid by `order`. On: sections per group in group order, then "Ungrouped".
+- [x] Section headings are real headings; sections work in portrait and landscape.
 
 **Done when:** On iPhone, create two groups, assign sounds, switch Group view on and off and see grouped then flat display; after a full relaunch groups, assignments and the toggle are unchanged; deleting a group leaves its sounds playable under Ungrouped.
 

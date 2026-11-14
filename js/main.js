@@ -6,7 +6,8 @@ import { PALETTE } from "./palette.js";
 
 const state = {
   sounds: [],
-  settings: { overlap: true, loop: false, volume: 1 },
+  groups: [],
+  settings: { overlap: true, loop: false, volume: 1, groupView: false },
   failed: new Set(),
   edit: false,
 };
@@ -18,6 +19,7 @@ const stopBtn = $("stop-btn");
 const overlapBtn = $("overlap-btn");
 const loopBtn = $("loop-btn");
 const editBtn = $("edit-btn");
+const groupViewBtn = $("groupview-btn");
 const volumeInput = $("volume");
 
 function refresh() {
@@ -25,13 +27,85 @@ function refresh() {
 }
 
 function render() {
-  ui.renderGrid(state.sounds, { onTap, onMove, edit: state.edit });
+  ui.renderGrid(state.sounds, {
+    onTap, onMove, edit: state.edit, groupView: state.settings.groupView, groups: state.groups,
+  });
+  ui.renderGroupsPanel(state.groups, state.edit, {
+    onAdd: onGroupAdd, onRename: onGroupRename, onDelete: onGroupDelete, onMove: onGroupMove,
+  });
   refresh();
+}
+
+function askGroupName(initial) {
+  const name = window.prompt("Group name", initial);
+  if (name === null) return null;
+  if (!name.trim()) {
+    ui.showMessage("Group names can't be empty.");
+    return null;
+  }
+  return name.trim();
+}
+
+async function onGroupAdd() {
+  const name = askGroupName("");
+  if (!name) return;
+  const order = state.groups.reduce((m, g) => Math.max(m, g.order), -1) + 1;
+  const group = { id: crypto.randomUUID(), name, order };
+  try {
+    await db.addGroup(group);
+  } catch {
+    ui.showMessage("Could not create the group.");
+    return;
+  }
+  state.groups.push(group);
+  render();
+}
+
+async function onGroupRename(id) {
+  const group = state.groups.find((g) => g.id === id);
+  const name = askGroupName(group.name);
+  if (!name) return;
+  try {
+    await db.updateGroup(id, { name });
+  } catch {
+    ui.showMessage("Could not rename the group.");
+    return;
+  }
+  group.name = name;
+  render();
+}
+
+async function onGroupDelete(id) {
+  const group = state.groups.find((g) => g.id === id);
+  if (!window.confirm(`Delete group "${group.name}"? Its sounds are kept and become ungrouped.`)) return;
+  try {
+    await db.deleteGroup(id);
+  } catch {
+    ui.showMessage("Could not delete the group.");
+    return;
+  }
+  state.groups = state.groups.filter((g) => g.id !== id);
+  state.sounds.forEach((s) => { if (s.groupId === id) s.groupId = null; });
+  render();
+}
+
+async function onGroupMove(id, neighborId) {
+  const a = state.groups.find((g) => g.id === id);
+  const b = state.groups.find((g) => g.id === neighborId);
+  try {
+    await Promise.all([db.updateGroup(a.id, { order: b.order }), db.updateGroup(b.id, { order: a.order })]);
+  } catch {
+    ui.showMessage("Could not save the new group order.");
+    return;
+  }
+  [a.order, b.order] = [b.order, a.order];
+  state.groups.sort((x, y) => x.order - y.order);
+  render();
 }
 
 function onTap(id) {
   if (state.edit) {
-    ui.openEditSheet(state.sounds.find((s) => s.id === id), { onSave, onDelete });
+    ui.openEditSheet(state.sounds.find((s) => s.id === id), state.groups, { onSave, onDelete });
     return;
   }
   if (!audio.hasBuffer(id)) return;
@@ -162,6 +236,12 @@ function wireToolbar() {
     }
   });
   stopBtn.addEventListener("click", () => audio.stopAll());
+  groupViewBtn.addEventListener("click", () => {
+    const on = !state.settings.groupView;
+    ui.setToggle(groupViewBtn, on);
+    setSetting("groupView", on);
+    render();
+  });
   editBtn.addEventListener("click", () => {
     state.edit = !state.edit;
     ui.setToggle(editBtn, state.edit);
@@ -190,10 +270,13 @@ async function init() {
   s.loop = await db.getSetting("loop", false);
   s.volume = await db.getSetting("volume", 1);
   ui.setToggle(overlapBtn, s.overlap);
+  s.groupView = await db.getSetting("groupView", false);
   ui.setToggle(loopBtn, s.loop);
+  ui.setToggle(groupViewBtn, s.groupView);
   volumeInput.value = Math.round(s.volume * 100);
   audio.setVolume(s.volume);
   state.sounds = await db.getAllSounds();
+  state.groups = await db.getAllGroups();
   render();
   await decodeAll();
   requestPersistence();
