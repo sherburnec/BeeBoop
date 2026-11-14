@@ -228,3 +228,45 @@ document.getElementById("edit-delete").addEventListener("click", () => {
   dialog.close();
   onDelete(sound.id);
 });
+
+const settingsDialog = document.getElementById("settings-dialog");
+const statusEl = document.getElementById("backup-status");
+const importDialog = document.getElementById("import-dialog");
+
+export function openSettings() {
+  statusEl.textContent = "";
+  settingsDialog.showModal();
+}
+
+export function setSettingsInfo({ usageText, lastBackupText }) {
+  document.getElementById("storage-info").textContent = usageText;
+  document.getElementById("backup-info").textContent = lastBackupText;
+}
+
+export function setBackupStatus(text) {
+  statusEl.textContent = text;
+}
+
+export function setBackupBusy(busy) {
+  document.getElementById("export-btn").disabled = busy;
+  document.getElementById("import-btn").disabled = busy;
+}
+
+document.getElementById("settings-close").addEventListener("click", () => settingsDialog.close());
+
+// Resolves "replace", "merge" or null (cancelled).
+export function askImportMode({ sounds, groups }) {
+  document.getElementById("import-summary").textContent =
+    `This backup has ${sounds} sound${sounds === 1 ? "" : "s"} and ${groups} group${groups === 1 ? "" : "s"}.`;
+  return new Promise((resolve) => {
+    const done = (value) => {
+      importDialog.close();
+      resolve(value);
+    };
+    document.getElementById("import-replace").onclick = () => done("replace");
+    document.getElementById("import-merge").onclick = () => done("merge");
+    document.getElementById("import-cancel").onclick = () => done(null);
+    importDialog.oncancel = () => resolve(null);
+    importDialog.showModal();
+  });
+}

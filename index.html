@@ -23,6 +23,7 @@
     <button id="loop-btn" type="button" aria-pressed="false">Loop</button>
     <button id="groupview-btn" type="button" aria-pressed="false">Group view</button>
     <button id="edit-btn" type="button" aria-pressed="false">Edit</button>
+    <button id="settings-btn" type="button">Settings</button>
     <label class="volume">Volume
       <input id="volume" type="range" min="0" max="100" step="1" value="100">
     </label>
@@ -57,6 +58,31 @@
         <button id="edit-delete" type="button" class="danger">Delete</button>
       </div>
     </form>
+  </dialog>
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <h2 id="settings-title">Settings</h2>
+    <p id="storage-info"></p>
+    <p id="backup-info"></p>
+    <div class="actions">
+      <button id="export-btn" type="button">Export backup</button>
+      <button id="import-btn" type="button">Import backup</button>
+      <input id="backup-input" type="file" accept=".json,application/json" hidden>
+    </div>
+    <p id="backup-status" role="status"></p>
+    <p class="help">If sounds are silent while the iPhone's silent switch is on, turn the switch off. Some iOS versions still mute web audio with it on.</p>
+    <div class="actions">
+      <button id="settings-close" type="button">Close</button>
+    </div>
+  </dialog>
+  <dialog id="import-dialog" aria-labelledby="import-title">
+    <h2 id="import-title">Import backup</h2>
+    <p id="import-summary"></p>
+    <p>Replace deletes everything currently on this device first. Merge adds the backup's sounds to what is already here.</p>
+    <div class="actions">
+      <button id="import-replace" type="button">Replace</button>
+      <button id="import-merge" type="button">Merge</button>
+      <button id="import-cancel" type="button">Cancel</button>
+    </div>
   </dialog>
   <script type="module" src="js/main.js"></script>
 </body>

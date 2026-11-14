@@ -1,7 +1,8 @@
 import * as db from "./db.js";
 import * as audio from "./audio.js";
 import * as ui from "./ui.js";
-import { requestPersistence } from "./storage.js";
+import { requestPersistence, getUsage, formatBytes } from "./storage.js";
+import * as backup from "./backup.js";
 import { PALETTE } from "./palette.js";
 
 const state = {
@@ -19,6 +20,10 @@ const stopBtn = $("stop-btn");
 const overlapBtn = $("overlap-btn");
 const loopBtn = $("loop-btn");
 const editBtn = $("edit-btn");
+const settingsBtn = $("settings-btn");
+const exportBtn = $("export-btn");
+const importBtn = $("import-btn");
+const backupInput = $("backup-input");
 const groupViewBtn = $("groupview-btn");
 const volumeInput = $("volume");
 
@@ -236,6 +241,17 @@ function wireToolbar() {
     }
   });
   stopBtn.addEventListener("click", () => audio.stopAll());
+  settingsBtn.addEventListener("click", () => {
+    ui.openSettings();
+    refreshSettingsInfo();
+  });
+  exportBtn.addEventListener("click", exportBackup);
+  importBtn.addEventListener("click", () => backupInput.click());
+  backupInput.addEventListener("change", () => {
+    const file = backupInput.files[0];
+    backupInput.value = "";
+    if (file) importBackup(file);
+  });
   groupViewBtn.addEventListener("click", () => {
     const on = !state.settings.groupView;
     ui.setToggle(groupViewBtn, on);
@@ -262,23 +278,85 @@ function wireToolbar() {
   volumeInput.addEventListener("change", () => setSetting("volume", volumeInput.value / 100));
 }
 
-async function init() {
-  wireToolbar();
-  audio.setOnChange(refresh);
+async function loadSettings() {
   const s = state.settings;
   s.overlap = await db.getSetting("overlap", true);
   s.loop = await db.getSetting("loop", false);
+  s.groupView = await db.getSetting("groupView", false);
   s.volume = await db.getSetting("volume", 1);
   ui.setToggle(overlapBtn, s.overlap);
-  s.groupView = await db.getSetting("groupView", false);
   ui.setToggle(loopBtn, s.loop);
   ui.setToggle(groupViewBtn, s.groupView);
   volumeInput.value = Math.round(s.volume * 100);
   audio.setVolume(s.volume);
+  audio.setLoop(s.loop);
+}
+
+async function loadLibrary() {
   state.sounds = await db.getAllSounds();
   state.groups = await db.getAllGroups();
+  state.failed.clear();
   render();
   await decodeAll();
+}
+
+async function refreshSettingsInfo() {
+  const usage = await getUsage();
+  const last = await db.getSetting("lastBackupAt", null);
+  ui.setSettingsInfo({
+    usageText: usage ? `Storage: ${formatBytes(usage.usage)} used of ${formatBytes(usage.quota)}.` : "Storage usage is not available on this device.",
+    lastBackupText: last ? `Last backup: ${new Date(last).toLocaleString()}.` : "Last backup: never.",
+  });
+}
+
+async function exportBackup() {
+  ui.setBackupBusy(true);
+  ui.setBackupStatus("Building backup…");
+  try {
+    const result = await backup.deliverBackup(await backup.buildBackup());
+    if (result === "cancelled") {
+      ui.setBackupStatus("Export cancelled.");
+    } else {
+      await db.setSetting("lastBackupAt", Date.now());
+      ui.setBackupStatus(result === "shared" ? "Backup shared." : "Backup downloaded.");
+    }
+  } catch {
+    ui.setBackupStatus("Export failed. Nothing was changed.");
+  } finally {
+    ui.setBackupBusy(false);
+    refreshSettingsInfo();
+  }
+}
+
+async function importBackup(file) {
+  ui.setBackupBusy(true);
+  try {
+    const data = await backup.readBackup(file);
+    const mode = await ui.askImportMode({ sounds: data.sounds.length, groups: data.groups.length });
+    if (!mode) {
+      ui.setBackupStatus("Import cancelled.");
+      return;
+    }
+    ui.setBackupStatus("Importing…");
+    await backup.restoreBackup(data, mode);
+    await loadSettings();
+    await loadLibrary();
+    ui.setBackupStatus(`Imported ${data.sounds.length} sound${data.sounds.length === 1 ? "" : "s"}.`);
+  } catch (err) {
+    if (err instanceof backup.BackupError) ui.setBackupStatus(err.message);
+    else if (db.isQuotaError(err)) ui.setBackupStatus("Storage is full. Nothing was changed.");
+    else ui.setBackupStatus("Import failed. Nothing was changed.");
+  } finally {
+    ui.setBackupBusy(false);
+    refreshSettingsInfo();
+  }
+}
+
+async function init() {
+  wireToolbar();
+  audio.setOnChange(refresh);
+  await loadSettings();
+  await loadLibrary();
   requestPersistence();
 }
 

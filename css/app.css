@@ -241,3 +241,7 @@ dialog h2 { margin: 0 0 12px; font-size: 1.2rem; }
 .groups-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
 .group-name { flex: 1 1 100%; font-weight: 600; overflow-wrap: anywhere; }
 .groups-list button:disabled { opacity: 0.35; }
+
+/* Settings */
+.help { font-size: 0.9rem; color: #4a4658; }
+#backup-status { min-height: 1.5em; }

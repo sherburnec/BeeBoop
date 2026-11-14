@@ -143,13 +143,13 @@ Files appear only in the milestone that needs them. Keep files small.
 **Files touched:** `js/backup.js`, `js/storage.js`, `js/ui.js`, `js/main.js`, `index.html`
 
 **Tasks:**
-- [ ] Settings area with Export, Import, storage usage, and last backup date.
-- [ ] Export: build the backup file per format v1, offer via `navigator.share` with a file where supported, else download link fallback.
-- [ ] Import: file input, parse and validate (`app`, `version`, field types) before touching the DB.
-- [ ] Ask Replace or Merge. Replace clears and writes; merge adds with new ids on collision (remap `groupId` accordingly).
-- [ ] Write in a way that a failure leaves existing data intact (validate and decode everything first).
-- [ ] Handle `QuotaExceededError` with a clear message.
-- [ ] Store `lastBackupAt`.
+- [x] Settings area with Export, Import, storage usage, and last backup date.
+- [x] Export: build the backup file per format v1, offer via `navigator.share` with a file where supported, else download link fallback.
+- [x] Import: file input, parse and validate (`app`, `version`, field types) before touching the DB.
+- [x] Ask Replace or Merge. Replace clears and writes; merge adds with new ids on collision (remap `groupId` accordingly).
+- [x] Write in a way that a failure leaves existing data intact (validate and decode everything first).
+- [x] Handle `QuotaExceededError` with a clear message.
+- [x] Store `lastBackupAt`.
 
 **Done when:** Export then clear site data then Import restores every sound with identical playback, names, colors, emoji, order, groups and settings; a hand-corrupted file is rejected with an error and the library is unchanged; storage usage displays.
 
